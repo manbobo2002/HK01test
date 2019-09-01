@@ -1,0 +1,97 @@
+<html>
+	<head>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+	</head>
+	<body>
+	<canvas id="bar-chart" width=300" height="150"></canvas>
+
+		<script>
+		
+			function update(clicked_id) {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+					var obj = JSON.parse(this.responseText);
+					if (clicked_id=="Potato")
+						document.getElementById("Potatotext").value=obj.body.Count;
+					else if (clicked_id=="LamLam")
+						document.getElementById("LamLamtext").value=obj.body.Count;
+					else
+						document.getElementById("Righttext").value=obj.body.Count;
+					}
+				};
+				xhttp.open("POST", "https://qkf9995433.execute-api.us-east-2.amazonaws.com/prod/MyServerlessWebsite", true);
+				if (clicked_id=="Potato")
+						xhttp.send(JSON.stringify({
+			  "value": document.getElementById("Potatotext").value
+			}));
+					else if (clicked_id=="LamLam")
+						xhttp.send(JSON.stringify({
+			  "value": document.getElementById("LamLamtext").value
+			}));
+					else
+						xhttp.send(JSON.stringify({
+			  "value": document.getElementById("Righttext").value
+			}));
+				
+			}
+			
+			function graph() {
+			new Chart(document.getElementById("bar-chart"), {
+			type: 'bar',
+			data: {
+			  labels: ["Potato", "LamLam", "Right"],
+			  datasets: [
+				{
+				  label: "Number of votes",
+				  backgroundColor: ["red", "blue","yellow"],
+				  data: [document.getElementById("Potatotext").value,document.getElementById("LamLamtext").value,document.getElementById("Righttext").value]
+				}
+			  ]
+			},
+			options: {
+			  legend: { display: false },
+			  title: {
+				display: true,
+				text: ''
+			  },
+
+			  scales: {
+					yAxes: [{
+						ticks: {
+							beginAtZero:true
+						}
+					}]
+				}
+
+			}
+
+
+		});
+			}
+			
+			
+
+
+		</script>
+	<div align="center">
+		<br>
+		<br>
+		<br>
+		<br>
+		<h1><span id="my-demo">Potato</span></h1>
+		<input type="text" id="Potatotext" value="100" disabled>
+		<button id="Potato" onclick="update(this.id)">Support</button>
+		<h1><span id="my-demo2">LamLam</span></h1>
+		<input type="text" id="LamLamtext" value="60" disabled>
+		<button id="LamLam" onclick="update(this.id)">Support</button>
+		<h1><span id="my-demo3">Right</span></h1>
+		<input type="text" id="Righttext" value="80" disabled>
+		<button id="Right" onclick="update(this.id)">Support</button>
+		<br><br>
+		<button id="Refresh" onclick="graph()">Refresh</button>
+		<br>
+	</div>
+
+	</body>
+</html>
