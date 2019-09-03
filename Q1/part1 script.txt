@@ -1,0 +1,59 @@
+# download from ftp
+wget -m ftp://ita.ee.lbl.gov/traces/NASA_access_log_Aug95.gz
+
+# go to the dir
+cd ita.ee.lbl.gov/traces/
+
+# unzip
+gunzip NASA_access_log_Aug95.gz
+
+# check logging
+vi NASA_access_log_Aug95
+
+# Q1a(1)
+# count the total number of HTTP requests recorded by this access logfile
+grep -o 'HTTP' NASA_access_log_Aug95 | wc -l
+
+# To ensure the answer makes sense, just count the total number of line of file, it should be smaller than this number
+wc -l NASA_access_log_Aug95
+
+
+awk -vDate=`date -d '13:20' +[%d/%b/%Y:%H:%M:%S` -vDate2=`date -d'13:30' +[%d/%b/%Y:%H:%M:%S` ' { if ($4 > Date && $4 < Date2) print $0}' access.log 
+
+
+# Q1a(2)
+# find the top-10 (host) hosts makes most requests from 18th Aug to 20th Aug
+
+# filter the range of log to 18Augto20Aug
+sed -n '/18\/Aug\/1995/,/20\/Aug\/1995/ p' NASA_access_log_Aug95 > 18Augto20Aug
+
+
+# first we group and count the hosts
+awk '{print $1}' 18Augto20Aug  | sort | uniq -c > group18Augto20Aug 
+# second we sort the grouped hosts with count
+sort -n group18Augto20Aug > sortgroup18Augto20Aug
+# finally we just get the tail of 10 hosts (i.e. the largest 10 counts)
+tail -n 10 sortgroup18Augto20Aug
+
+# Q1a(3)
+# find out the country with most requests originating from (according the source host /
+IP)
+
+# we get the hostname first
+cat NASA_access_log_Aug95 | sed 's/|/ /' | awk '{print $1}' > hostname
+
+# convert host to country and sort
+cat hostname | xargs -L1 geoiplookup > countrylog
+cat countrylog | sed 's/|/ /' | awk '{print $2}' > countryname
+
+# filter the useless word
+cat countryname | grep -v "Edition\|can't" > filteredcountryname
+
+# we group and count the country
+awk '{print $1}' filteredcountryname  | sort | uniq -c > groupcountryname 
+
+# second we sort the grouped country with count
+sort -n groupcountryname > sortgroupcountryname
+
+# finally we just get the last country (i.e. the largest 1 count)
+tail -n 1 sortgroupcountryname
